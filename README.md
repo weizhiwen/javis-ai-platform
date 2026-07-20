@@ -6,7 +6,7 @@
 
 ### 后端
 - **Java**: 25
-- **Spring Boot**: 4.0.7
+- **Spring Boot**: 3.5.10
 - **Embabel Agent**: 1.0.0
 - **数据库**: PostgreSQL 16 + pgvector
 - **缓存**: Redis 7
@@ -37,7 +37,9 @@ javis-ai-platform
 ├── frontend/                  # Vue 3 前端
 ├── docker/                    # Docker 配置
 ├── docs/                      # 文档
-└── docker-compose.yml         # Docker Compose 配置
+├── Makefile                   # 开发环境管理
+├── docker-compose.yml         # Docker Compose 配置
+└── .env.example               # 环境变量模板
 ```
 
 ## 快速开始
@@ -165,7 +167,8 @@ cp .env.example .env
 主要配置项：
 - `OPENAI_API_KEY`: OpenAI API 密钥
 - `POSTGRES_PASSWORD`: PostgreSQL 密码
-- `REDIS_PASSWORD`: Redis 密码
+- `REDIS_HOST`: Redis 地址
+- `REDIS_PORT`: Redis 端口
 
 ## 文档
 

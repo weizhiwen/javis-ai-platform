@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Javis AI Platform — 企业级 AI Agent 平台。Java 25 + Spring Boot 4 后端（多模块 Maven），Vue 3 + TypeScript + Naive UI 前端。
+Javis AI Platform — 企业级 AI Agent 平台。Java 25 + Spring Boot 3.5 后端（多模块 Maven），Vue 3 + TypeScript + Naive UI 前端。
 
 ## Architecture
 
@@ -26,6 +26,9 @@ javis-application      Layer 5  Spring Boot 启动模块，聚合所有模块
 
 ```
 src/
+├── App.vue         根组件
+├── main.ts         应用入口
+├── assets/         静态资源
 ├── components/     可复用组件
 ├── composables/    组合式函数
 ├── layouts/        布局组件
@@ -181,10 +184,7 @@ E2E 测试框架: **Playwright**
 
 ```
 e2e/
-├── login.spec.ts
-├── agent.spec.ts
-├── chat.spec.ts
-└── ...
+└── login.spec.ts
 ```
 
 命名规范: `{页面/功能}.spec.ts`
@@ -203,11 +203,10 @@ Playwright 配置要点:
 
 配置在 `backend/pom.xml` 中，CI 中通过 `mvn spotless:check` 检查。提交前必须运行 `mvn spotless:apply`。
 
-### Frontend: ESLint + Prettier
+### Frontend: ESLint
 
 - **ESLint 9** flat config (`eslint.config.js`)
-- **Prettier** 格式化代码
-- 规则: `@vue/typescript/recommended` + `plugin:vue/vue3-recommended`
+- 规则: `@vue/eslint-config-typescript` (`strictTypeChecked`) + `plugin:vue/flat/recommended`
 - 提交前必须通过 `npm run lint:check` 和 `npm run type-check`
 
 ## Commit Convention
