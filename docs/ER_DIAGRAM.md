@@ -1,7 +1,8 @@
-# javis-domain E-R Diagram
+# E-R Diagram
 
 > 生成日期: 2026-07-21
-> 实体总数: 20 个 (+ 2 个中间表)
+> 更新日期: 2026-07-21 (AiModel 移至 javis-model 模块，domain 改用 UUID 引用)
+> 实体总数: 19 个 (+ 2 个中间表) + 1 个 model 模块实体
 > 所有实体继承 `BaseEntity` (id, created_at, updated_at, deleted)
 
 ```mermaid
@@ -38,9 +39,9 @@ erDiagram
     Role }o--o{ Permission : "role_permissions"
 
     %% ====================================================================
-    %% AI 模型
+    %% AI 模型 (javis-model 模块)
     %% ====================================================================
-    AiModel {
+    ModelConfig {
         UUID id PK
         String name
         String model_id
@@ -96,6 +97,7 @@ erDiagram
         String version
         VersionStatus status
         String system_prompt
+        UUID model_id FK "→ ModelConfig"
     }
 
     Prompt {
@@ -131,6 +133,7 @@ erDiagram
         UUID id PK
         String name
         String description
+        UUID embedding_model_id FK "→ ModelConfig"
         Integer chunk_size
         Integer chunk_overlap
         Integer document_count
@@ -166,6 +169,7 @@ erDiagram
     Conversation {
         UUID id PK
         String title
+        UUID model_id FK "→ ModelConfig (可选覆盖)"
         String last_message_preview
         Instant last_message_at
     }
@@ -215,14 +219,14 @@ erDiagram
     %% 跨域关联
     %% ====================================================================
     Agent }o--|| User : "creator"
-    AgentVersion }o--o| AiModel : "model"
+    AgentVersion }o--o| ModelConfig : "modelId (UUID)"
     AgentVersionTool }o--|| ToolDefinition : "tool"
     AgentVersionKnowledgeBase }o--|| KnowledgeBase : "knowledgeBase"
     KnowledgeBase }o--|| User : "creator"
-    KnowledgeBase }o--o| AiModel : "embeddingModel"
+    KnowledgeBase }o--o| ModelConfig : "embeddingModelId (UUID)"
     Conversation }o--|| Agent : "agent"
     Conversation }o--|| User : "user"
-    Conversation }o--o| AiModel : "model"
+    Conversation }o--o| ModelConfig : "modelId (UUID)"
     WorkflowDefinition }o--|| User : "creator"
 ```
 
@@ -236,7 +240,7 @@ erDiagram
 | Agent → AgentVersion | OneToOne | currentVersion (循环 FK) |
 | Agent → AgentVersion | OneToMany | versions |
 | AgentVersion → Agent | ManyToOne | agent |
-| AgentVersion → AiModel | ManyToOne | model |
+| AgentVersion → ModelConfig | UUID | modelId (跨模块引用) |
 | AgentVersionTool → AgentVersion | ManyToOne | version |
 | AgentVersionTool → ToolDefinition | ManyToOne | tool |
 | AgentVersionKnowledgeBase → AgentVersion | ManyToOne | version |
@@ -245,13 +249,13 @@ erDiagram
 | ToolDefinition → ToolConfig | OneToMany | configs |
 | ToolDefinition → ToolParameter | OneToMany | parameters |
 | KnowledgeBase → User | ManyToOne | creator |
-| KnowledgeBase → AiModel | ManyToOne | embeddingModel |
+| KnowledgeBase → ModelConfig | UUID | embeddingModelId (跨模块引用) |
 | Document → KnowledgeBase | ManyToOne | knowledgeBase |
 | Chunk → Document | ManyToOne | document |
 | Chunk → KnowledgeBase | ManyToOne | knowledgeBase (冗余) |
 | Conversation → Agent | ManyToOne | agent |
 | Conversation → User | ManyToOne | user |
-| Conversation → AiModel | ManyToOne | model |
+| Conversation → ModelConfig | UUID | modelId (跨模块引用，可选覆盖) |
 | Message → Conversation | ManyToOne | conversation |
 | WorkflowDefinition → User | ManyToOne | creator |
 | WorkflowNode → WorkflowDefinition | ManyToOne | workflow |

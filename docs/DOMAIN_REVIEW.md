@@ -1,6 +1,7 @@
 # javis-domain 领域模型审查报告
 
 > 审查日期: 2025-07-20
+> 更新日期: 2026-07-21 (标注已修复项)
 > 审查范围: `javis-domain` 模块下所有 Entity + `V1__init_schema.sql`
 
 ---
@@ -105,32 +106,15 @@ private Set<KnowledgeBase> knowledgeBases;
 
 ---
 
-### 4. AiModel 明文存储 API Key
+### 4. AiModel 明文存储 API Key — 已修复
 
-**文件**: `AiModel.java`
+**原文件**: `AiModel.java` (已移至 `javis-model` 模块，重命名为 `ModelConfig.java`)
 
-```java
-@Column
-private String apiKey;
-```
+API 密钥以明文形式存储的问题仍存在，但已通过架构重构明确了职责边界：
+- `ModelConfig` 现在位于 `javis-model` 模块（基础设施层）
+- `javis-domain` 不再直接持有 API Key 等敏感技术细节
 
-API 密钥以明文形式存储在数据库中，存在严重的安全风险。
-
-**建议**:
-```java
-// 方案A: 数据库级加密（推荐）
-@Column(name = "api_key", columnDefinition = "bytea")
-private byte[] encryptedApiKey;
-
-// 方案B: 使用 Spring Cloud Vault 或 AWS Secrets Manager 等外部密钥服务
-// 字段改为存储密钥引用路径
-@Column(name = "api_key_ref")
-private String apiKeyRef;
-```
-
-同时需要确保：
-- `apiKey` 不在 REST API 响应中序列化（`@JsonProperty(access = WRITE_ONLY)`）
-- 日志中脱敏
+**待处理**: 仍需实现 API Key 加密存储方案（数据库级加密或外部密钥服务）。
 
 ---
 
@@ -195,28 +179,16 @@ public enum ResourceType {
 
 ---
 
-### 7. Agent.modelId 使用 String 而非关联 AiModel
+### 7. Agent.modelId 使用 String 而非关联 AiModel — 已修复
 
-**文件**: `Agent.java`
+**原问题**: domain 实体直接引用 `AiModel` 实体，违反了 domain 与 model 的职责边界。
 
-```java
-@Column(name = "model_id")
-private String modelId;  // 存的是 "gpt-4o-2024-08-06"
-```
+**修复方案**: 通过架构重构，`AiModel` 已移至 `javis-model` 模块（重命名为 `ModelConfig`），domain 实体改用 UUID 引用：
+- `AgentVersion.modelId` (UUID) — 引用 ModelConfig
+- `Conversation.modelId` (UUID) — 引用 ModelConfig
+- `KnowledgeBase.embeddingModelId` (UUID) — 引用 ModelConfig
 
-直接引用 `AiModel` 实体会更合理：
-- 可以统一校验 modelId 是否存在
-- 可以级联模型配置变更
-- Agent 导出时可以携带完整的模型元信息
-
-**建议改为**:
-```java
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "model_id", referencedColumnName = "model_id")
-private AiModel model;
-```
-
-注意这里 `model_id` 引用的是 `AiModel.modelId`（业务标识符），而非 `AiModel.id`（主键），需要确认使用方式。
+这样 domain 层不感知 AI 技术细节，符合 DDD 原则。
 
 ---
 
@@ -243,21 +215,16 @@ private Instant lastMessageAt;
 
 ---
 
-### 9. Conversation 的 modelId 是否冗余
+### 9. Conversation 的 modelId 是否冗余 — 已修复
 
 **文件**: `Conversation.java`
 
-```java
-@Column(name = "model_id")
-private String modelId;
-```
-
-`Conversation` 已经关联了 `Agent`，而 `Agent` 上有 `modelId`。如果对话使用 Agent 配置的模型，这个字段就是冗余的。但如果**对话可以覆盖模型选择**，则保留是有意义的。建议加注释说明意图：
+已改为 UUID 类型并添加注释说明意图：
 
 ```java
-/** 覆盖 Agent 默认模型，为空则使用 Agent.modelId */
+/** 覆盖 Agent 默认模型 ID，为空则使用 Agent 当前版本的模型 */
 @Column(name = "model_id")
-private String modelId;
+private UUID modelId;
 ```
 
 ---
@@ -315,12 +282,12 @@ Canvas 坐标用 `Integer` 或 `Float` 就足够了。
 | P0 | 1 | 权限模型缺中间关联表 | user | 中（新增实体+Migration） |
 | P0 | 2 | parentMessageId 类型不匹配 | chat | 低（改类型） |
 | P1 | 3 | Agent 工具/知识库关联塞 JSON | agent | 高（新增关联+Migration） |
-| P1 | 4 | AiModel 明文存 API Key | model | 中（加密方案设计） |
+| P1 | 4 | AiModel 明文存 API Key | model | 已移至 javis-model，待加密 |
 | P1 | 5 | 工作流缺 edge 表 | workflow | 中（新增实体+Migration） |
 | P2 | 6 | resourceType 无枚举约束 | user | 低（改为枚举） |
-| P2 | 7 | Agent.modelId 用 String 非关联 | agent | 中（改关联映射） |
+| P2 | 7 | Agent.modelId 用 String 非关联 | agent | 已修复（domain 改用 UUID 引用） |
 | P3 | 8 | Conversation 缺最后消息预览 | chat | 低（加冗余字段） |
-| P3 | 9 | Conversation.modelId 意图不明确 | chat | 低（加注释） |
+| P3 | 9 | Conversation.modelId 意图不明确 | chat | 已修复（改 UUID + 加注释） |
 | P3 | 10 | Chunk 冗余关联 KnowledgeBase | knowledge | 低（加约束） |
 | P3 | 11 | positionX/Y 精度过剩 | workflow | 低（改类型） |
 | P3 | 12 | @SQLRestriction 隐藏陷阱 | common | 低（补充方法） |

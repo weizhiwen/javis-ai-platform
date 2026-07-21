@@ -84,13 +84,15 @@ npm run dev
 ## 模块说明
 
 ### javis-domain
-核心领域模型，包含所有业务实体：
-- User, Role, Permission, Tenant (权限)
+核心业务领域，包含所有业务实体（纯业务概念，不含 AI 技术细节）：
+- User, Role, Permission (权限)
 - Agent, AgentVersion, Prompt (智能体)
 - Conversation, Message (对话)
 - KnowledgeBase, Document, Chunk (知识库)
 - ToolDefinition (工具)
 - WorkflowDefinition, WorkflowNode (工作流)
+
+> 注意：domain 实体通过 UUID 引用 AI 模型（如 `modelId`），不直接依赖具体模型实现。
 
 ### javis-agent
 AI Agent 核心模块，基于 Embabel Agent Framework：
@@ -99,13 +101,10 @@ AI Agent 核心模块，基于 Embabel Agent Framework：
 - Agent 执行上下文
 
 ### javis-model
-模型抽象层，支持多种 LLM 提供商：
-- OpenAI
-- DeepSeek
-- Qwen
-- Claude
-- Gemini
-- Ollama
+AI 模型接入能力模块，屏蔽不同模型厂商差异：
+- ModelConfig: 模型配置实体（provider、apiKey、baseUrl、modelId）
+- ModelProvider: 提供商枚举（OpenAI / DeepSeek / Qwen / Claude / Gemini / Ollama）
+- 统一调用接口，屏蔽厂商差异
 
 ### javis-knowledge
 知识库模块：

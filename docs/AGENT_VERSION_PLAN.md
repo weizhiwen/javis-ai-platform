@@ -168,9 +168,9 @@ public class AgentVersion extends BaseEntity {
     @Column(name = "system_prompt", columnDefinition = "TEXT")
     private String systemPrompt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "model_id")
-    private AiModel model;
+    /** 关联的 AI 模型 ID（引用 javis-model 模块的 ModelConfig） */
+    @Column(name = "model_id")
+    private UUID modelId;
 
     /** 版本绑定的工具 */
     @OneToMany(mappedBy = "version", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -285,7 +285,7 @@ if (draft == null) {
     draft.setStatus(DRAFT);
 }
 draft.setSystemPrompt(newPrompt);
-draft.setModel(newModel);
+draft.setModelId(newModelId);
 draft.setTools(newTools);      // clear + addAll
 draft.setKnowledgeBases(newKBs);
 versionRepository.save(draft);
@@ -325,7 +325,7 @@ draft.setAgent(historical.getAgent());
 draft.setVersion("0.0.0");
 draft.setStatus(DRAFT);
 draft.setSystemPrompt(historical.getSystemPrompt());
-draft.setModel(historical.getModel());
+draft.setModelId(historical.getModelId());
 // 复制工具/知识库关联 ...
 versionRepository.save(draft);
 ```
@@ -343,7 +343,7 @@ AgentVersion active = agent.getCurrentVersion() != null
 
 active.getSystemPrompt();   // 当前生效的 prompt
 active.getTools();          // 当前绑定的工具
-active.getModel();          // 当前使用的模型
+active.getModelId();        // 当前使用的模型 ID
 ```
 
 ---

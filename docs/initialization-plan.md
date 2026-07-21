@@ -106,10 +106,13 @@ javis-application (Spring Boot 启动)
 - Tenant
 
 **AI (智能体)**:
-- AiModel
 - Agent
 - AgentVersion
 - Prompt
+
+**AI 模型 (javis-model 模块)**:
+- ModelConfig (原 AiModel，已移至 model 模块)
+- ModelProvider
 
 **Chat (对话)**:
 - Conversation
