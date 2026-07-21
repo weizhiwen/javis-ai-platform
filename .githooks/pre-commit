@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+# 获取本次 commit 暂存区的文件变更
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+# ── 后端 Java 格式化 ──────────────────────────────────────────
+BACKEND_CHANGED=false
+for f in $STAGED_FILES; do
+    if [[ "$f" == backend/src/*.java ]]; then
+        BACKEND_CHANGED=true
+        break
+    fi
+done
+
+if [ "$BACKEND_CHANGED" = true ]; then
+    echo "🔧 Formatting Java files with Spotless..."
+    cd "$ROOT_DIR/backend"
+    mvn spotless:apply -q 2>/dev/null || mvn spotless:apply   # 重试一次显示输出
+    echo "✅ Spotless done"
+fi
+
+# ── 前端格式化 ────────────────────────────────────────────────
+FRONTEND_CHANGED=false
+for f in $STAGED_FILES; do
+    if [[ "$f" == frontend/src/*.ts || "$f" == frontend/src/*.vue || "$f" == frontend/src/*.js ]]; then
+        FRONTEND_CHANGED=true
+        break
+    fi
+done
+
+if [ "$FRONTEND_CHANGED" = true ]; then
+    echo "🔧 Linting frontend files with ESLint..."
+    cd "$ROOT_DIR/frontend"
+    npm run lint 2>/dev/null || true
+    echo "✅ ESLint done"
+fi
+
+# ── 重新暂存格式化后的文件 ────────────────────────────────────
+git add --update

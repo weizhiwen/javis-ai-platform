@@ -56,9 +56,10 @@ public class Conversation extends BaseEntity {
     public void addMessage(Message message) {
         this.messages.add(message);
         message.setConversation(this);
-        this.lastMessagePreview = message.getContent().length() > 200
-                ? message.getContent().substring(0, 200)
-                : message.getContent();
+        this.lastMessagePreview =
+                message.getContent().length() > 200
+                        ? message.getContent().substring(0, 200)
+                        : message.getContent();
         this.lastMessageAt = message.getCreatedAt();
     }
 

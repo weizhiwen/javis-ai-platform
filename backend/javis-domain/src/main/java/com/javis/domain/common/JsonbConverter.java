@@ -9,7 +9,8 @@ import jakarta.persistence.AttributeConverter;
 
 public abstract class JsonbConverter<T> implements AttributeConverter<T, String> {
 
-    protected static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new JavaTimeModule());
+    protected static final ObjectMapper MAPPER =
+            new ObjectMapper().registerModule(new JavaTimeModule());
 
     protected abstract TypeReference<T> typeReference();
 

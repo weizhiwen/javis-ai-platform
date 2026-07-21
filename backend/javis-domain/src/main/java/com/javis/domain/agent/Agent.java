@@ -66,7 +66,8 @@ public class Agent extends BaseEntity {
 
     public void setCurrentVersion(AgentVersion version) {
         if (!this.versions.contains(version)) {
-            throw new IllegalArgumentException("Version must be added to agent before setting as current");
+            throw new IllegalArgumentException(
+                    "Version must be added to agent before setting as current");
         }
         this.currentVersion = version;
     }

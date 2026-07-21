@@ -32,6 +32,5 @@ public class WorkflowEdge extends BaseEntity {
     private String conditionExpression;
 
     /** 边标签 */
-    @Column
-    private String label;
+    @Column private String label;
 }
