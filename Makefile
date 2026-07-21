@@ -27,7 +27,7 @@ infra: ## 启动基础设施 (PostgreSQL + Redis)
 	@docker-compose ps
 
 infra-down: ## 停止基础设施
-	docker-compose down
+	docker-compose down -v
 
 backend: ## 启动后端服务
 	@echo "Starting backend..."
