@@ -5,6 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EntityScan(basePackages = "com.javis.domain")
+@EntityScan(basePackages = {"com.javis.domain", "com.javis.model"})
 @EnableJpaRepositories(basePackages = "com.javis.domain")
 public class JpaConfig {}

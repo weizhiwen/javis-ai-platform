@@ -3,10 +3,10 @@ package com.javis.domain.chat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.javis.domain.agent.Agent;
 import com.javis.domain.common.BaseEntity;
-import com.javis.domain.model.AiModel;
 import com.javis.domain.user.User;
 
 import jakarta.persistence.Column;
@@ -36,10 +36,9 @@ public class Conversation extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    /** 覆盖 Agent 默认模型，为空则使用 Agent 当前版本的模型 */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "model_id")
-    private AiModel model;
+    /** 覆盖 Agent 默认模型 ID，为空则使用 Agent 当前版本的模型 */
+    @Column(name = "model_id")
+    private UUID modelId;
 
     /** 最后一条消息的预览文本，用于列表展示 */
     @Column(name = "last_message_preview", length = 200)

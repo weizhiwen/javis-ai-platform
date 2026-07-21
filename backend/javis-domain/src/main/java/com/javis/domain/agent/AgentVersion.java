@@ -2,9 +2,9 @@ package com.javis.domain.agent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.javis.domain.common.BaseEntity;
-import com.javis.domain.model.AiModel;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -41,10 +41,9 @@ public class AgentVersion extends BaseEntity {
     @Column(name = "system_prompt", columnDefinition = "TEXT")
     private String systemPrompt;
 
-    /** 关联的 AI 模型 */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "model_id")
-    private AiModel model;
+    /** 关联的 AI 模型 ID */
+    @Column(name = "model_id")
+    private UUID modelId;
 
     /** 版本绑定的工具列表 */
     @OneToMany(mappedBy = "version", cascade = CascadeType.ALL, orphanRemoval = true)

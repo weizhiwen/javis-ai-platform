@@ -2,9 +2,9 @@ package com.javis.domain.knowledge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.javis.domain.common.BaseEntity;
-import com.javis.domain.model.AiModel;
 import com.javis.domain.user.User;
 
 import jakarta.persistence.Column;
@@ -35,10 +35,9 @@ public class KnowledgeBase extends BaseEntity {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    /** 用于向量化的嵌入模型 */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "embedding_model_id")
-    private AiModel embeddingModel;
+    /** 用于向量化的嵌入模型 ID */
+    @Column(name = "embedding_model_id")
+    private UUID embeddingModelId;
 
     @Min(100)
     @Column(name = "chunk_size")
